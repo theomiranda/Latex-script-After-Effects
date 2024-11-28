@@ -24,6 +24,7 @@ This repository contains a script for Adobe After Effects to render LaTeX equati
 - Enter your LaTeX code into the provided field.
 - Set the desired resolution (`1x`, `2x`, `3x`) for the output.
 - Click **Generate Image** to render your equation.
+- If you create a null layer named **Control** (**Null 1**), the script will automatically parent the rendered image layer to this null.
 
 ## Prerequisites
 
@@ -49,4 +50,3 @@ Contributions are welcome! Please create a pull request or raise an issue if you
 ## Contact
 
 For questions or suggestions, feel free to open an issue on GitHub.
-
