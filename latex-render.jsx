@@ -1,9 +1,8 @@
 // LaTeX Renderer.jsx
-// Save this script with .jsx extension in the Scripts\ScriptUI Panels folder of After Effects
+// Save this script with the .jsx extension in the Scripts\ScriptUI Panels folder of After Effects
 
 (function (thisObj) {
-
-    // Polyfill para JSON.parse e JSON.stringify
+    // Polyfill for JSON.parse and JSON.stringify
     if (typeof JSON === 'undefined') {
         JSON = {};
     }
@@ -11,11 +10,11 @@
         JSON.stringify = function (obj) {
             var t = typeof (obj);
             if (t !== "object" || obj === null) {
-                // Valores simples
+                // Simple values
                 if (t === "string") obj = '"' + obj.replace(/(["\\])/g, '\\$1') + '"';
                 return String(obj);
             } else {
-                // Objetos ou arrays
+                // Objects or arrays
                 var json = [], isArray = (obj && obj.constructor === Array);
                 for (var n in obj) {
                     var v = obj[n];
@@ -38,33 +37,33 @@
     }
 
     function createLatexPanel(thisObj) {
-        // Criação do painel
+        // Panel creation
         var panel = (thisObj instanceof Panel) ? thisObj : new Window('palette', 'LaTeX Renderer', undefined, { resizable: true });
         panel.orientation = 'column';
         panel.alignChildren = ['fill', 'top'];
 
-        // Grupo para configurações
-        var settingsGroup = panel.add("panel", undefined, "Configurações");
+        // Configuration group
+        var settingsGroup = panel.add("panel", undefined, "Configurations");
         settingsGroup.orientation = "column";
         settingsGroup.alignChildren = ["fill", "top"];
         settingsGroup.margins = 15;
 
-        // Obter o diretório inicial do usuário
+        // Get user's home directory
         var userHome = Folder('~').fsName;
 
-        // Carregar as pastas favoritas do arquivo de configuração
+        // Load favorite folders from configuration file
         var favoriteFolders = loadFavoriteFolders();
 
-        // Grupo para seleção de pasta
+        // Folder selection group
         var folderGroup = settingsGroup.add("group");
         folderGroup.orientation = "row";
 
-        // Campo de texto para o caminho da pasta
+        // Text field for folder path
         var folderPath = folderGroup.add("edittext", undefined, "");
         folderPath.size = [300, 25];
 
-        // Botão "Procurar"
-        var browseButton = folderGroup.add("button", undefined, "Procurar");
+        // "Browse" button
+        var browseButton = folderGroup.add("button", undefined, "Browse");
 
         browseButton.onClick = function () {
             var initialFolder;
@@ -78,14 +77,14 @@
                 initialFolder = Folder.myDocuments;
             }
 
-            var folder = Folder.selectDialog("Select folder to save images", initialFolder);
+            var folder = Folder.selectDialog("Select the folder to save images", initialFolder);
 
             if (folder) {
                 folderPath.text = folder.fsName;
             }
         };
 
-        // Adicionar um grupo para o menu suspenso de pastas favoritas e os botões "Salvar Pasta" e "Excluir Pasta"
+        // Add a group for the favorite folders dropdown and "Save Folder" and "Delete Folder" buttons
         var favoriteFoldersGroup = settingsGroup.add("group");
         favoriteFoldersGroup.orientation = "row";
 
@@ -93,7 +92,7 @@
         var favoriteFoldersDropdown = favoriteFoldersGroup.add("dropdownlist", undefined, []);
         favoriteFoldersDropdown.size = [150, 25];
 
-        // "Save Folder" button next to dropdown
+        // "Save Folder" button next to the dropdown
         var saveFavoriteButton = favoriteFoldersGroup.add("button", undefined, "Save Folder");
 
         saveFavoriteButton.onClick = function () {
@@ -115,7 +114,7 @@
             if (selectedIndex > 0) {
                 var confirmDelete = confirm("Are you sure you want to delete the selected favorite folder?");
                 if (confirmDelete) {
-                    favoriteFolders.splice(selectedIndex - 1, 1); // Remove favorite folder
+                    favoriteFolders.splice(selectedIndex - 1, 1); // Remove the favorite folder
                     saveFavoriteFolders();
                     updateFavoriteFoldersDropdown();
                     alert("Favorite folder deleted.");
@@ -125,7 +124,7 @@
             }
         };
 
-        // Function to update favorite folders dropdown
+        // Function to update the favorite folders dropdown
         function updateFavoriteFoldersDropdown() {
             favoriteFoldersDropdown.removeAll();
             favoriteFoldersDropdown.add("item", "Select...");
@@ -140,30 +139,30 @@
         favoriteFoldersDropdown.onChange = function () {
             var selectedIndex = favoriteFoldersDropdown.selection.index;
             if (selectedIndex > 0) {
-                var selectedFolder = favoriteFolders[selectedIndex - 1]; // Adjust index
+                var selectedFolder = favoriteFolders[selectedIndex - 1]; // Adjust the index
                 folderPath.text = selectedFolder.path;
             }
         };
 
-        // Formula name field
+        // Field for formula name
         var formulaGroup = settingsGroup.add("group");
         formulaGroup.orientation = "row";
         formulaGroup.add("statictext", undefined, "Formula name:");
         var formulaName = formulaGroup.add("edittext", undefined, "formula");
         formulaName.size = [200, 25];
 
-        // Grupo para seleção de resolução
+        // Size selection group
         var sizeGroup = settingsGroup.add("group");
         sizeGroup.add("statictext", undefined, "Resolution:");
         var sizeDropdown = sizeGroup.add("dropdownlist", undefined, ["1x", "2x", "3x"]);
-        sizeDropdown.selection = 1; // 2x as default
+        sizeDropdown.selection = 1; // 2x default
 
-        // Checkbox to select import mode
+        // Checkbox for import mode
         var importModeGroup = settingsGroup.add("group");
         importModeGroup.orientation = "row";
         var separateElementsCheckbox = importModeGroup.add("checkbox", undefined, "Import separate elements");
 
-        // LaTeX Input
+        // LaTeX input
         var inputGroup = panel.add("panel", undefined, "LaTeX Code");
         inputGroup.orientation = "column";
         inputGroup.alignChildren = ["fill", "top"];
@@ -175,7 +174,7 @@
         });
         latexInput.size = [400, 150];
 
-        // Status e botão
+        // Status and button
         var statusText = panel.add("statictext", undefined, "Status: Ready");
         statusText.alignment = ["fill", "top"];
 
@@ -188,7 +187,7 @@
 
             try {
                 statusText.text = "Status: Generating image...";
-                // Update panel
+                // Update the panel
                 if (panel instanceof Window) {
                     panel.update();
                 } else {
@@ -211,12 +210,12 @@
                     // Render and import separate elements
                     renderAndImportSeparateElements(latexCode, options, statusText, panel);
                 } else {
-                    // Renderizar e importar fórmula completa
-                    var imageFile = renderLatexToImage(cleanLatexCode(latexCode), options, statusText);
+                    // Render and import complete formula
+                    var imageFile = renderLatexToImage(latexCode, options, statusText);
 
                     if (imageFile && imageFile.exists && imageFile.length > 0) {
                         statusText.text = "Status: Importing image...";
-                        // Update panel
+                        // Update the panel
                         if (panel instanceof Window) {
                             panel.update();
                         } else {
@@ -226,7 +225,7 @@
                         importImageToComp(imageFile, options.formulaName, statusText);
                         statusText.text = "Status: Completed!";
                     } else {
-                        throw new Error("Error generating image. Check LaTeX code.");
+                        throw new Error("Error generating the image. Check the LaTeX code.");
                     }
                 }
             } catch (e) {
@@ -235,16 +234,16 @@
             }
         };
 
-        // Ajustar o layout
+        // Adjust layout
         panel.layout.layout(true);
 
-        // Se for uma janela (não um painel acoplável), mostrar a janela
+        // If it is a window (not a dockable panel), show the window
         if (panel instanceof Window) {
             panel.center();
             panel.show();
         }
 
-        // Função para carregar as pastas favoritas do arquivo de configuração
+        // Function to load favorite folders from the configuration file
         function loadFavoriteFolders() {
             var configFile = new File(Folder.userData.fullName + "/latex_renderer_favorites.json");
             var folders = [];
@@ -255,43 +254,43 @@
                     var content = configFile.read();
                     configFile.close();
 
-                    // Usar JSON.parse para interpretar o JSON
+                    // Use JSON.parse to interpret the JSON
                     folders = JSON.parse(content);
                 } catch (e) {
-                    alert("Erro ao carregar as pastas favoritas: " + e.toString() + "\nO arquivo de configuração será redefinido.");
-                    // Renomear o arquivo de configuração inválido
+                    alert("Error loading favorite folders: " + e.toString() + "\nThe configuration file will be reset.");
+                    // Rename the invalid configuration file
                     var backupFile = new File(configFile.fullName + "_backup");
                     configFile.rename(backupFile.name);
-                    // Criar um novo arquivo de configuração vazio
+                    // Create a new empty configuration file
                     folders = [];
                     saveFavoriteFolders();
                 }
             } else {
-                // If file doesn't exist, we can add a default folder
+                // If the file does not exist, we can add a default folder
                 folders.push({ name: "Default Folder", path: userHome });
             }
 
             return folders;
         }
 
-        // Função para salvar as pastas favoritas no arquivo de configuração
+        // Function to save favorite folders to the configuration file
         function saveFavoriteFolders() {
             var configFile = new File(Folder.userData.fullName + "/latex_renderer_favorites.json");
             try {
                 configFile.open('w');
-                configFile.write(JSON.stringify(favoriteFolders)); // Serializar o array em JSON
+                configFile.write(JSON.stringify(favoriteFolders)); // Serialize the array to JSON
                 configFile.close();
             } catch (e) {
                 alert("Error saving favorite folders: " + e.toString());
             }
         }
 
-        // Função para adicionar uma pasta favorita
+        // Function to add a favorite folder
         function addFavoriteFolder(path) {
-            // Garantir que o path é uma string
+            // Ensure the path is a string
             path = String(path);
 
-            // Verificar se a pasta já está na lista
+            // Check if the folder is already in the list
             for (var i = 0; i < favoriteFolders.length; i++) {
                 if (favoriteFolders[i].path === path) {
                     alert("This folder is already in favorites.");
@@ -299,25 +298,25 @@
                 }
             }
 
-            // Get folder name
+            // Get the folder name
             var folderName = prompt("Enter a name for the favorite folder:", "New Favorite Folder");
             if (folderName) {
                 favoriteFolders.push({ name: folderName, path: path });
                 saveFavoriteFolders();
             } else {
-                alert("Invalid name. Folder was not added.");
+                alert("Invalid name. The folder was not added.");
             }
         }
 
-        // Funções auxiliares
+        // Helper functions
 
-        // Função para limpar o código LaTeX
+        // Function to clean LaTeX code
         function cleanLatexCode(code) {
             if (typeof code !== "string") {
                 throw new Error("The provided LaTeX code is not a valid string.");
             }
 
-            // Função auxiliar para escapar caracteres especiais
+            // Helper function to escape special characters
             function escapeSpecialChars(str) {
                 var specialChars = {
                     'á': '{\\\'a}',
@@ -354,17 +353,17 @@
                 });
             }
 
-            // Remove espaços extras
+            // Remove extra spaces
             code = code.replace(/\s+/g, " ").trim();
 
-            // Remove delimitadores como $$ ou $ no início e fim
-            code = code.replace(/^\$\$|\$\$$/g, ""); // Remove $$ no início e fim
-            code = code.replace(/^\$|\$$/g, "");     // Remove $ no início e fim
+            // Remove delimiters like $$ or $ at the beginning and end
+            code = code.replace(/^\$\$|\$\$$/g, ""); // Remove $$ at the beginning and end
+            code = code.replace(/^\$|\$$/g, "");     // Remove $ at the beginning and end
 
-            // Escapar caracteres especiais
+            // Escape special characters
             code = escapeSpecialChars(code);
 
-            // Substituições adicionais de símbolos
+            // Additional symbol replacements
             var symbolReplacements = {
                 '≅': '\\approx',
                 '≠': '\\neq',
@@ -394,7 +393,7 @@
             return code;
         }
 
-        // Função para renderizar o LaTeX em imagem
+        // Function to render LaTeX to image
         function renderLatexToImage(latexCode, options, statusText) {
             latexCode = cleanLatexCode(latexCode);
 
@@ -408,7 +407,7 @@
 
             var fullLatex = params.join(" ");
             
-            // Codificação mais robusta da URL
+            // More robust URL encoding
             var apiUrl = baseUrl + encodeURIComponent(fullLatex)
                 .replace(/'/g, "%27")
                 .replace(/\(/g, "%28")
@@ -426,14 +425,14 @@
                 var timestamp = new Date().getTime();
                 var tempFile = new File(outputFolder.fullName + "/" + options.formulaName + "_" + timestamp + ".png");
 
-                // Executa o comando cURL
+                // Execute the cURL command
                 var downloadCommand = 'curl -L -k --fail --max-time 60 -o "' + tempFile.fsName + '" "' + apiUrl + '"';
                 var result = system.callSystem(downloadCommand);
 
                 if (tempFile.exists && tempFile.length > 0) {
                     return tempFile;
                 } else {
-                    throw new Error("Failed to download or create PNG file.");
+                    throw new Error("Failed to download or create the PNG file.");
                 }
             } catch (e) {
                 statusText.text = "Error downloading image: " + e.toString();
@@ -441,7 +440,7 @@
             }
         }
 
-        // Função para importar a imagem na composição
+        // Function to import the image into the composition
         function importImageToComp(imageFile, formulaName, statusText) {
             var comp = app.project.activeItem;
             if (!(comp instanceof CompItem)) {
@@ -449,30 +448,30 @@
             }
 
             try {
-                // Importar e adicionar à composição
+                // Import and add to the composition
                 var importedFile = app.project.importFile(new ImportOptions(imageFile));
                 var layer = comp.layers.add(importedFile);
 
-                // Centralizar na composição
+                // Center in the composition
                 layer.position.setValue([comp.width / 2, comp.height / 2]);
 
-                // Configurar escala e motion blur
+                // Configure scale and motion blur
                 layer.property("Scale").setValue([110, 110]);
                 layer.motionBlur = true;
 
-                // Adicionar efeito de preenchimento (Fill)
+                // Add Fill effect
                 var fillEffect = layer.Effects.addProperty("ADBE Fill");
-                fillEffect.property("Color").setValue([0.11, 0.11, 0.11]); // Cor escura
+                fillEffect.property("Color").setValue([0.11, 0.11, 0.11]); // Dark color
 
-                // Procurar por null layer "Controle" ou "Null 1"
+                // Look for "Control" or "Null 1" null layer
                 var nullLayer = findNullLayer(comp);
 
-                // Se encontrou o null layer, fazer parenting
+                // If a null layer is found, parent it
                 if (nullLayer) {
                     layer.parent = nullLayer;
-                    statusText.text = "Status: Parenting completed successfully!";
+                    statusText.text = "Status: Parenting successful!";
                 } else {
-                    statusText.text = "Status: No null layer found. Layer added without parent.";
+                    statusText.text = "Status: No null layer found. The layer was added without parenting.";
                 }
 
                 return layer;
@@ -481,19 +480,19 @@
             }
         }
 
-        // Função para encontrar o null layer
+        // Function to find the null layer
         function findNullLayer(comp) {
-            // Procurar por null layer "Controle" ou "Null 1"
+            // Look for "Control" or "Null 1" null layer
             for (var i = 1; i <= comp.numLayers; i++) {
                 var currentLayer = comp.layer(i);
-                if (currentLayer.nullLayer && (currentLayer.name === "Controle" || currentLayer.name === "Null 1")) {
+                if (currentLayer.nullLayer && (currentLayer.name === "Control" || currentLayer.name === "Null 1")) {
                     return currentLayer;
                 }
             }
             return null;
         }
 
-        // Função para renderizar e importar elementos separados
+        // Function to render and import separate elements
         function renderAndImportSeparateElements(latexCode, options, statusText, panel) {
             var elements = splitLatexElements(latexCode);
             var layers = [];
@@ -508,7 +507,7 @@
                 var elementName = options.formulaName + "_element_" + (i + 1);
 
                 statusText.text = "Status: Rendering element " + (i + 1) + " of " + elements.length;
-                // Update panel
+                // Update the panel
                 if (panel instanceof Window) {
                     panel.update();
                 } else {
@@ -526,31 +525,31 @@
                 if (imageFile && imageFile.exists && imageFile.length > 0) {
                     importImageToComp(imageFile, elementName, statusText);
                 } else {
-                    throw new Error("Error generating image for element: " + elementCode);
+                    throw new Error("Error generating the image for element: " + elementCode);
                 }
             }
 
-            statusText.text = "Status: All elements have been imported!";
+            statusText.text = "Status: All elements were imported!";
         }
 
-        // Função para limpar o código LaTeX específico para o modo de split
+        // Function to clean LaTeX code specifically for split mode
         function cleanLatexCodeForSplit(code) {
-            // Chama a função original de limpeza
+            // Call the original cleaning function
             code = cleanLatexCode(code);
 
-            // Remove \begin{align} e \end{align}
+            // Remove \begin{align} and \end{align}
             code = code.replace(/\\begin\{align\*?\}/g, "");
             code = code.replace(/\\end\{align\*?\}/g, "");
 
             return code;
         }
 
-        // Função para dividir o código LaTeX em elementos
+        // Function to split LaTeX code into elements
         function splitLatexElements(latexCode) {
-            // Usar uma expressão regular para dividir no 'SPLIT' ou 'split', case-insensitive
+            // Use a regex to split on 'SPLIT' or 'split', case-insensitive
             var elements = latexCode.split(/SPLIT/i);
 
-            // Limpar espaços em branco em cada elemento
+            // Clean up whitespace in each element
             var cleanedElements = [];
             for (var i = 0; i < elements.length; i++) {
                 var elem = elements[i].replace(/^\s+|\s+$/g, '');
@@ -563,7 +562,7 @@
         }
     }
 
-    // Chamar a função para criar o painel
+    // Call the function to create the panel
     var latexPanel = createLatexPanel(thisObj);
 
 })(this);
