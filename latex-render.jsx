@@ -345,20 +345,18 @@
                     'Ú': '{\\\'U}',
                     'Ü': '{\\\\"U}',
                     'Ç': '{\\c{C}}',
-                    '$': '\\$'
+                    '$': '\\$',
+                    'º': '\\textsuperscript{o}',
+                    '&': '\\&' // Escape & for LaTeX
                 };
-                
-                return str.replace(/[áàãâéêíóõôúüçÁÀÃÂÉÊÍÓÕÔÚÜÇ$]/g, function(match) {
+
+                return str.replace(/[áàãâéêíóõôúüçÁÀÃÂÉÊÍÓÕÔÚÜÇ$º&]/g, function(match) {
                     return specialChars[match] || match;
                 });
             }
 
             // Remove extra spaces
             code = code.replace(/\s+/g, " ").trim();
-
-            // Remove delimiters like $$ or $ at the beginning and end
-            code = code.replace(/^\$\$|\$\$$/g, ""); // Remove $$ at the beginning and end
-            code = code.replace(/^\$|\$$/g, "");     // Remove $ at the beginning and end
 
             // Escape special characters
             code = escapeSpecialChars(code);
@@ -385,7 +383,7 @@
                 '∩': '\\cap',
                 '∅': '\\emptyset'
             };
-            
+
             for (var symbol in symbolReplacements) {
                 code = code.replace(new RegExp(symbol, 'g'), symbolReplacements[symbol]);
             }
@@ -406,7 +404,7 @@
             params.push(latexCode);
 
             var fullLatex = params.join(" ");
-            
+
             // More robust URL encoding
             var apiUrl = baseUrl + encodeURIComponent(fullLatex)
                 .replace(/'/g, "%27")
@@ -414,7 +412,11 @@
                 .replace(/\)/g, "%29")
                 .replace(/\*/g, "%2A")
                 .replace(/!/g, "%21")
-                .replace(/~/g, "%7E");
+                .replace(/~/g, "%7E")
+                .replace(/&/g, "%26"); // Escape & for URL
+
+            // Log the URL for debugging
+            $.writeln("API URL: " + apiUrl);
 
             try {
                 var outputFolder = new Folder(options.outputFolder);
@@ -540,6 +542,10 @@
             // Remove \begin{align} and \end{align}
             code = code.replace(/\\begin\{align\*?\}/g, "");
             code = code.replace(/\\end\{align\*?\}/g, "");
+
+            // Remove \begin{gather} and \end{gather}
+            code = code.replace(/\\begin\{gather\*?\}/g, "");
+            code = code.replace(/\\end\{gather\*?\}/g, "");
 
             return code;
         }
