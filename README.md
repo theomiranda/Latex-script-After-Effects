@@ -2,7 +2,7 @@
 
 This repository contains a script for Adobe After Effects to render LaTeX equations as images. It provides features to import the rendered formulas or individual elements into your composition.
 
-![image](https://github.com/user-attachments/assets/d52f7c93-8222-467c-94c0-af58f50cb1e7) ![image](https://public-files.gumroad.com/spu95cwia9y0ja5i9hkyn4rmmcq2)
+![image](https://public-files.gumroad.com/spu95cwia9y0ja5i9hkyn4rmmcq2)
 
 ## Features
 
@@ -48,6 +48,8 @@ Contributions are welcome! Please create a pull request or raise an issue if you
 ## Acknowledgements
 
 - **LaTeX rendering** is handled using the [CodeCogs API](https://latex.codecogs.com).
+
+![image](https://github.com/user-attachments/assets/d52f7c93-8222-467c-94c0-af58f50cb1e7)
 
 ## Contact
 
