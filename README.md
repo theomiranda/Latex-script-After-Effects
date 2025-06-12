@@ -22,6 +22,7 @@ This repository contains a script for Adobe After Effects to render LaTeX equati
 
 ## Usage
 
+![image](https://github.com/user-attachments/assets/d52f7c93-8222-467c-94c0-af58f50cb1e7)
 - Choose the folder where you want to save the images.
 - Enter your LaTeX code into the provided field.
 - Set the desired resolution (`1x`, `2x`, `3x`) for the output.
@@ -49,7 +50,6 @@ Contributions are welcome! Please create a pull request or raise an issue if you
 
 - **LaTeX rendering** is handled using the [CodeCogs API](https://latex.codecogs.com).
 
-![image](https://github.com/user-attachments/assets/d52f7c93-8222-467c-94c0-af58f50cb1e7)
 
 ## Contact
 
